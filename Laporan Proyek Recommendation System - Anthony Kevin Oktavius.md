@@ -15,7 +15,7 @@ Dengan banyaknya judul anime yang ada, para pecinta anime akan mengalami kesulit
 
 ![Naruto](https://static.wikia.nocookie.net/naruto/images/d/d6/Naruto_Part_I.png/revision/latest?cb=20210223094656)
 
-Anime sudah memiliki banyak genre. Dalam dataset kita, genre anime ada lebih dari 40 genre. Namun, perlu diingat, umumnya, genre yang ditag pada anime tidak hanya satu. Misalnya, jika kita lihat pada anime naruto, genre anime tersebut adalah adventure, martial arts, dan fantasy comedy. Hal ini menjadi peluang agar kita bisa merekomendasikan data anime yang cocok. Selain memberikan data genre yang sama, kita juga bisa memberikan genre lain, yang user bisa coba tonton. Dengan demikian, para pencinta anime bisa disarankan untuk mencoba untuk menonton anime yang memiliki genre yang sama, namun ditambahkan dengan variasi-variasi lainnya, seperti type pada anime.
+Anime sudah memiliki banyak genre. Dalam dataset kita, genre anime ada lebih dari 40 genre. Namun, perlu diingat, umumnya, genre yang ditag pada anime tidak hanya satu. Misalnya, jika kita lihat pada anime naruto, genre anime tersebut adalah adventure, martial arts, dan fantasy comedy. Hal ini menjadi peluang agar kita bisa merekomendasikan data anime yang cocok. Selain memberikan data genre yang sama, kita juga bisa memberikan genre lain, yang user bisa coba tonton. Dengan demikian, para pencinta anime bisa disarankan untuk mencoba untuk menonton anime yang memiliki genre yang sama, namun ditambahkan dengan variasi-variasi genre lainnya.
 
 Terlebih lagi, kita bisa merekomendasikan anime kepada user, berdasarkan rating yang ada. Penting untuk melakukan filterisasi berdasarkan rating, karena nilai rating menunjukkan kualitas anime yang ada. Tentu kita harus memberikan anime dengan rating yang baik, agar user bisa lebih menikmati anime.
 
@@ -35,7 +35,7 @@ Dari uraian di atas, proyek ini menarik untuk dibahas dengan menggunakan recomme
 
 * Bagaimana kita bisa melakukan rekomendasi produk dengan content based filtering, jika data genre ada lebih dari satu?
 
-* Dengan data rating yang ada, bagaimana kita merekomendasikan anime jepada user yang belum pernah ditonton dan belum pernah dikunjungi?
+* Dengan data rating yang ada, bagaimana kita merekomendasikan anime kepada user yang belum pernah ditonton dan belum pernah dikunjungi?
 
 ### Goals
 
@@ -47,14 +47,14 @@ Dari uraian di atas, proyek ini menarik untuk dibahas dengan menggunakan recomme
 
 Seperti penjelasan pada latar belakang, kita akan membuat sistem rekomendasi dengan menggunakan collaborative filtering dan content based filtering. Di sini, saya akan menggunakan dua algoritma, yaitu sebagai berikut.
 
-* TF IDF Vectorizer dan cosine similarity
+* Count Vectorizer dan cosine similarity
 * SVD (Single Value Decomposition)
 
 Metrik yang akan digunakan adalah sebagai berikut.
 
 * Content Based Filtering
     
-    * Accuracy
+    * Precision
 
 * Collaborative Filtering
     
@@ -82,7 +82,7 @@ Deskripsi fitur-fitur pada data dapat dilihat sebagai berikut.
 * **name**: nama anime
 * **genre**: label untuk identifikasi kategori anime. Genre-genre ini dipisahkan dengan tanda koma, misalnya "Action, Adventure, Game", "Game, Romance, Shounen"
 * **type**: tipe anime tersebut, misalnya movie, TV, OVA, dll.
-* **rpisodes**: jumlah episode dalam anime (-1 jika merupakan movie)
+* **episodes**: jumlah episode dalam anime (-1 jika merupakan movie)
 * **rating**: nilai rata-rata yang diberikan dari semua rating user. 
 * **members**: jumlah member komunitas pada nama anime yang diberikan.
 
@@ -109,7 +109,8 @@ Langkah-langkah pemahaman data yang dilakukan adalah sebagai berikut.
     * Menghapus data yang null
     * Menghapus data yang memiliki episodes yang unknown.
     * Karena field episodes memiliki tipe data object, maka kita akan ubah menjadi tipe float64.
-    * Melihat data statistika pada members dengan menggunakan describe().
+  
+  * Melihat data statistika pada members dengan menggunakan describe().
 
   * **Eksplorasi data Genre:**
     * Melihat jumlah data pada genre individual. Berikut saya tampilkan tiga data genre yang paling banyak dan tiga data genre yang paling sedikit muncul. 
@@ -161,8 +162,14 @@ Langkah-langkah pemahaman data yang dilakukan adalah sebagai berikut.
      * **info()**: menjelaskan jumlah kolom yang non-null dan data type.
       
      * **describe()**: menjelaskan beberapa informasi mengenai statistika suatu data.
+ 
   
+   * **Missing Values:**
+    
+     * Menghapus data rating -1, karena ia menunjukkan bahwa user belum melakukan rating sama sekali.
+
    * **Eksplorasi Data Rating:**
+
      * Melihat persebaran data anime rating dengan menggunakan plot histogram
     
         Berikut adalah hasil plotting rating.
@@ -170,8 +177,6 @@ Langkah-langkah pemahaman data yang dilakukan adalah sebagai berikut.
         ![Eksplorasi Data Rating](https://github.com/MaxZx3000/Recommendation-System-Anime/blob/main/Submission-2-images/anime_rating_analysis.png?raw=true)
 
         Pada gambar di atas, banyak user yang memberikan rating antara 8 - 10. Hal ini menunjukkan bahwa banyak anime yang sangat digemari oleh para user. 
-  
-     * Menghapus data rating -1, karena ia menunjukkan bahwa user belum melakukan rating sama sekali.
   
   * Melihat jumlah atribut yang **unik**, dengan field-field sebagai berikut.
   
@@ -198,12 +203,29 @@ Langkah-langkah pemahaman data yang dilakukan adalah sebagai berikut.
 
 * **Data Preparation untuk Content Based Filtering:**
 
+    **Sebelum melakukan Exploratory Data Analysis:**
+
+    Missing Value pada anime.csv:
+    
+    * Menghapus data yang null, karena data yang null tidak akan bisa kita proses datanya dengan machine learnin.
+  
+    * Menghapus data yang memiliki episodes yang unknown. Hal ini bertujuan agar saya bisa melakukan analisis univariate pada field episodes.
+  
+    * Karena field episodes memiliki tipe data object, maka kita akan ubah menjadi tipe float64.
+
+    **Setelah melakukan Exploratory Data Analysis:**
+
     * Melakukan splitting value ketika ada tanda koma (,), agar kita bisa merekomendasikan anime yang memiliki genre tambahan selain genre yang ditentukan.
 
 * **Data Preparation untuk Collaborative Filtering:**
+  
+  **Sebelum melakukan exploratory data analysis:**
 
+  Missing Value pada rating.csv:
 
-  * Melakukan standardisasi pada nilai rating, agar machine learning bisa lebih cepat mempelajari data (terutama jika berbicara mengenai jarak dan gradient descent), dengan skala antara 0 - 1.
+  * Melakukan hapus data dengan rating -1, karena user tersebut belum melakukan review sama sekali. Jika terdapat value ini, hal ini akan menyebabkan bias, karena rating pada anime memiliki rentang antara 1 - 10.
+  
+  **Setelah melakukan exploratory data analysis:**
 
   * Melakukan train test split, dengan proporsi sebagai berikut:
 
@@ -212,47 +234,61 @@ Langkah-langkah pemahaman data yang dilakukan adalah sebagai berikut.
 
     Tujuan dari pembagian data ini adalah agar kita bisa mengukur kemampuan machine learning dengan data yang belum pernah dipelajari. 
 
+  * Melakukan standardisasi pada nilai rating, agar machine learning bisa lebih cepat mempelajari data (terutama jika berbicara mengenai jarak dan gradient descent), dengan skala antara 0 - 1. Apabila kita lihat, tahap standardisasi dilakukan belakangan setelah train test split. Hal ini dilakukan karena .
+
 ## Modelling
 
-* Content Based Filtering dengan cosine similarity dan TD IDF Vectorizer
+* Content Based Filtering dengan Cosine Similarity dan Count Vectorizer
 
-    **TF IDF Vectorizer:**
+    **Count Vectorizer:**
 
-    TD-IDF (Term Frequency - Inverse Document Frequency) mengukur seberapa pentingnya suatu kata terhadap kata-kata lain dalam dokumen. Ia dibagi menjadi 2 komponen, yaitu TF dan IDF.
+    Count Vectorizer adalah salah satu teknik untuk melakukan konversi suatu string menjadi representasi frekuensi. Count Vectorizer ini sangat berguna untuk diimplementasikan apabila kita tidak ingin melihat hubungan makna yang terdapat pada kalimat tersebut. 
 
-    * TF mengukur seberapa sering kata muncul dalam teks tertentu. Teks yang berbeda dalam dokumen mungkin panjangnya berbeda, karena ada faktor dari panjang dokumen. Teks yang berbeda memiliki panjang yang berbeda. Maka dari itu, harus dinormalisasi dengan membagi jumlah kemunculan terhadap panjang dokumen.
+    Sebagai contoh, perhatikan kalimat berikut.
 
-    * IDF mengukur pentingnya suatu istilah di dalam korpus. Ia memastikan agar kepentingan suatu kata di dalam kalimat itu sama. Misalkan stop words seperti is, am, are, dsb sering muncul di suatu kalimat, namun mereka tidak penting kehadirannya. Maka dari itu, semua kata dinormalisasikan agar setiap kata bisa mendapatkan nilai kepentingan yang fair.
+    D1: Drama, Romance, School, Supernatural
 
-        Dari kesimpulan di atas, kita bisa mendapatkan rumus sebagai berikut.
+    D2: Drama, Comedy, School, Romance
 
-        ![Rumus TF-IDF](https://cdn-media-1.freecodecamp.org/images/1*nSqHXwOIJ2fa_EFLTh5KYw.png)
+    Maka dari itu, berikut adalah representasi dari count vectorizer.
 
-        Dalam fungsi ini, kita bisa menggunakan TfIdfVectorizer. TFIdfVectorizer adalah salah satu fungsi yang disediakan dari sklearn.
+
+    | Document | Drama | Romance | School | Supernatural | Comedy | 
+    | ------- | ------- | ------- | ------- | ------- | ------- | 
+    | D1 | 1 | 1 | 1 | 1 | 0 |        
+    | D2 | 1 | 1 | 1 | 0 | 1 |
+
 
     **Cosine Similarity:**
 
     Cosine similarity adalah salah satu metrik untuk mengukur kesamaan. Cosine similarity mengukur kesamaan dua vektor dengan menentukan apakah kedua vektornya sudah mengarah kepada arah yang sama. Semakin kecil sudut cosinus, semakin besar nilai cosine similarity.
 
-    Metrik ini sering digunakan untuk analisis teks. Dalam hal ini, dari hasil TF IDF, kita akan mengukur kesamaan antar satu item dengan fitur yang ada pada item tersebut, sehingga kita bisa merekomendasikan anime yang cocok dengan genre yang diberikan.
+    Metrik ini sering digunakan untuk analisis teks. Dalam hal ini, dari hasil Count Vectorizer, kita akan mengukur kesamaan antar satu item dengan fitur yang ada pada item tersebut, sehingga kita bisa merekomendasikan anime yang cocok dengan genre yang diberikan.
 
     Rumusnya adalah sebagai berikut.
 
-    ![Rumus Cosine Similarity](https://neo4j.com/docs/graph-data-science/current/_images/cosine-similarity.png)
+    ![Rumus Cosine Similarity](https://www.researchgate.net/profile/Said-Salloum/publication/345471138/figure/fig2/AS:955431962808321@1604804139868/Cosine-similarity-formula.png)
 
-    Kelebihan:
+    **Kelebihan:**
 
-    Fitur utama dari TF IDF adalah ia tidak hanya berfokus kepada frekuensi suatu kata, namun juga dengan kepentingan suatu kata. Salah satu contohnya adalah stop words, seperti the, is, am, are. Stop words umumnya tidak begitu penting dalam pemrosesan kepentingan kata. Maka dari itu, jika ingin menyeimbangkan kepentingan suatu kata, TF IDF adalah salah satu algoritma yang cocok untuk digunakan.
+    * Cocok digunakan apabila kita hanya ingin melihat jumlah frekuensi kata dalam suatu kalimat, tanpa melihat hubungan kata dan makna yang ada. Dengan demikian, performa komputasi akan lebih cepat.
 
-    Kekurangan:
+    **Kekurangan:**
 
-    * TF IDF merupakan teknik yang didasarkan pada bag of words. Jadi, TF IDF ini tidak memperhatikan urutan kata, baik setelah atau sebelumnya.
-    
-    * TF IDF tidak bisa menganalisa semantik pada kata (hubungan antar satu kata dengan kata lain).
+    * Tidak memperhatikan keseimbangan jumlah kata pada kalimat. Sebagai contoh, stopwords umumnya tidak begitu penting dalam kalimat.
 
-    Berikut adalah hasil output rekomendasi sistem menggunakan TF IDF dan cosine similarity.
+    * Tidak memperhatikan urutan kata, karena teknik ini didasarkan pada bag of words.
 
-    ![Rekomendasi dengan TF IDF](https://github.com/MaxZx3000/Recommendation-System-Anime/blob/main/Submission-2-images/hasil_rekomendasi_tf_idf.png?raw=true)
+    * Tidak bisa menganalisis semantik pada kata (hubungan antar satu kata dengan kata lain).
+
+    Berikut adalah hasil output rekomendasi sistem menggunakan Count Vectorizer dan cosine similarity.
+
+    |index|name|genre|
+    |---|---|---|
+    |0|Kimi no Na wa\.|Drama, Romance, School, Supernatural|
+    |1|Wind: A Breath of Heart \(TV)|Drama, Romance, School, Supernatural|
+    |2|Wind: A Breath of Heart OVA|Drama, Romance, School, Supernatural|
+    |3|Tokimeki Memorial: Forever With You|Drama, Romance, School|
 
 
 * Collaborative Filtering dengan SVD
@@ -273,12 +309,14 @@ Langkah-langkah pemahaman data yang dilakukan adalah sebagai berikut.
 
     Untuk melakukan training pada SVD, ia menggunakan teknik SGD (Schocastic Gradient Descent). SGD bekerja dengan meminimalkan nilai awal dan melakukan iterasi untuk mengurangi kesalahan antara nilai yang diprediksi dan nilai aktual. Mirip seperti SGD pada klasifikasi, ia akan mengoptimalkan cost function agar bisa konvergensi ke titik global optima.
 
-    Kelebihan:
+    **Kelebihan:**
+
     * SVD adalah salah satu bagian dari dimensionality reduction. Namun, jika berbicara mengenai performa, SVD dibilang cukup efisien.
     
     * Mengurangi noise pada data (data yang tidak merata)
 
-    Kekurangan:
+    **Kekurangan:**
+
     * Jika data telah ditransformasi dalam bentuk matriks, ia akan sulit untuk dimengerti.
     
     * Sulit untuk divisualisasikan.
@@ -288,26 +326,33 @@ Langkah-langkah pemahaman data yang dilakukan adalah sebagai berikut.
 
     Berikut adalah 5 rekomendasi teratas yang dihasilkan dari rekomendasi menggunakan SVD.
 
-    ![Hasil Rekomendasi SVD](https://github.com/MaxZx3000/Recommendation-System-Anime/blob/main/Submission-2-images/hasil_rekomendasi_svd.png?raw=true)
+    |index|anime\_id|name|genre|type|episodes|rating|members|
+    |---|---|---|---|---|---|---|---|
+    |1|5114|Fullmetal Alchemist: Brotherhood|Action, Adventure, Drama, Fantasy, Magic, Military, Shounen|TV|64\.0|9\.26|793665|
+    |35|431|Howl no Ugoku Shiro|Adventure, Drama, Fantasy, Romance|Movie|1\.0|8\.74|333186|
+    |58|24415|Kuroko no Basket 3rd Season|Comedy, School, Shounen, Sports|TV|25\.0|8\.62|184525|
+    |99|22789|Barakamon|Comedy, Slice of Life|TV|12\.0|8\.5|225927|
+    |226|3901|Baccano\! Specials|Action, Comedy, Historical, Mystery, Seinen, Supernatural|Special|3\.0|8\.29|100412|
 
  
 ## Evaluation
 
-* Content Based Filtering dengan TF IDF dan Cosine Similarity
+* **Content Based Filtering dengan Count Vectorizer dan Cosine Similarity**
 
-    Dalam content based filtering, saya hanya akan menggunakan satu metrik saja, yaitu accuracy.
+    Dalam content based filtering, saya hanya akan menggunakan satu metrik saja, yaitu precision.
 
-    **Accuracy**: nilai pecahan yang menunjukkan rasio antara jumlah data yang diprediksi benar dengan total jumlah data yang ada.
+    **Precision**: dalam sistem rekomendasi, preision adalah jumlah item rekomendasi yang relevan. Cara mendapatkan hasil ini adalah dengan menghitung jumlah rekomendasi yang relevan dengan jumlah item yang kita rekomendasikan.
 
-    Berikut adalah hasil akurasi dengan sampel data yang ada, jika menggunakan judul anime "Kimi no Na wa.".
+    Berikut adalah hasil precision dengan sampel data yang ada, jika menggunakan judul anime "Kimi no Na wa.", dengan genre 
+    Drama.
 
     ```
-    Accuracy Score: 100.0%
+    Precision Score: 100.0%
     ```
 
-    Pada hasil akurasi di atas, dapat dilihat bahwa ia bisa merekomendasikan genre anime yang sama dengan genre yang sama dengan judul anime yang diberikan. Maka dari itu, dapat dikatakan bahwa model TF IDF Vectorizer dan Cosine Similarity mampu memprediksi data yang mirip/ sama dengan genre yang diberikan.
+    Pada hasil precision di atas, dapat dilihat bahwa ia bisa merekomendasikan genre anime yang sama dengan genre yang sama dengan judul anime yang diberikan. Maka dari itu, dapat dikatakan bahwa model Count Vectorizer dan Cosine Similarity mampu memprediksi data yang mirip/ sama dengan genre yang diberikan.
 
-* Collaborative Filtering dengan SVD
+* **Collaborative Filtering dengan SVD**
 
     Dalam collaborative filtering, terdapat dua metrik yang saya gunakan, yaitu MAE dan RMSE. 
 
@@ -323,30 +368,31 @@ Langkah-langkah pemahaman data yang dilakukan adalah sebagai berikut.
 
 
     ```
-                           Fold 1  Fold 2  Fold 3  Mean    Std     
-         RMSE (testset)    0.1533  0.1537  0.1533  0.1534  0.0002 
+                      Fold 1  Fold 2  Fold 3  Mean    Std     
+    RMSE (testset)    0.1479  0.1478  0.1476  0.1478  0.0001  
+    MSE (testset)     0.0219  0.0218  0.0218  0.0218  0.0000  
     ``` 
     
-    Dari hasil ini, kita bisa menyimpulkan bahwa nilai RMSE (rata-ratanya adalah 0.1534) dan MAE bernilai kecil (rata-ratanya adalah ). Untuk membuktikan bahwa hasil ini benar, perhatikan beberapa hasil prediksi dari data testing, dengan menggunakan salah satu sampel id.
+    Dari hasil ini, kita bisa menyimpulkan bahwa nilai RMSE (rata-ratanya adalah 0.1478) dan MAE bernilai kecil (rata-ratanya adalah 0.0218). Untuk membuktikan bahwa hasil ini benar, perhatikan beberapa hasil prediksi dari data testing, dengan menggunakan salah satu sampel id.
 
     ```
-        user: 23435      item: 9790       r_ui = 0.78   est = 0.87   {'was_impossible': False}
-        user: 23435      item: 1575       r_ui = 0.89   est = 1.00   {'was_impossible': False}
-        user: 23435      item: 205        r_ui = 1.00   est = 0.95   {'was_impossible': False}
-        user: 23435      item: 3927       r_ui = 1.00   est = 0.91   {'was_impossible': False}
-        user: 23435      item: 1535       r_ui = 1.00   est = 0.99   {'was_impossible': False}
-        user: 23435      item: 16680      r_ui = 0.67   est = 0.86   {'was_impossible': False}
+        user: 23435      item: 24415      r_ui = 1.00   est = 1.00   {'was_impossible': False}
+        user: 23435      item: 551        r_ui = 0.78   est = 0.78   {'was_impossible': False}
+        user: 23435      item: 22789      r_ui = 1.00   est = 0.99   {'was_impossible': False}
+        user: 23435      item: 6974       r_ui = 0.78   est = 0.82   {'was_impossible': False}
         user: 23435      item: 4224       r_ui = 1.00   est = 0.96   {'was_impossible': False}
-        user: 23435      item: 21327      r_ui = 0.78   est = 0.89   {'was_impossible': False}
-        user: 23435      item: 1069       r_ui = 1.00   est = 0.89   {'was_impossible': False}
-        user: 23435      item: 16894      r_ui = 1.00   est = 1.00   {'was_impossible': False}
-        user: 23435      item: 30868      r_ui = 0.89   est = 0.74   {'was_impossible': False}
-        user: 23435      item: 137        r_ui = 1.00   est = 0.99   {'was_impossible': False}
-        user: 23435      item: 3901       r_ui = 1.00   est = 0.92   {'was_impossible': False}
-        user: 23435      item: 60         r_ui = 0.78   est = 0.94   {'was_impossible': False}
-        user: 23435      item: 26243      r_ui = 0.67   est = 0.85   {'was_impossible': False}
-        user: 23435      item: 18179      r_ui = 1.00   est = 0.87   {'was_impossible': False}
-
+        user: 23435      item: 5040       r_ui = 1.00   est = 0.93   {'was_impossible': False}
+        user: 23435      item: 5681       r_ui = 1.00   est = 0.93   {'was_impossible': False}
+        user: 23435      item: 6213       r_ui = 0.89   est = 0.90   {'was_impossible': False}
+        user: 23435      item: 431        r_ui = 0.67   est = 0.99   {'was_impossible': False}
+        user: 23435      item: 11577      r_ui = 1.00   est = 0.91   {'was_impossible': False}
+        user: 23435      item: 237        r_ui = 0.89   est = 0.96   {'was_impossible': False}
+        user: 23435      item: 10408      r_ui = 0.89   est = 0.95   {'was_impossible': False}
+        user: 23435      item: 11371      r_ui = 1.00   est = 0.93   {'was_impossible': False}
+        user: 23435      item: 763        r_ui = 0.89   est = 0.79   {'was_impossible': False}
+        user: 23435      item: 8557       r_ui = 0.78   est = 0.90   {'was_impossible': False}
+        user: 23435      item: 883        r_ui = 1.00   est = 0.74   {'was_impossible': False}
+        user: 23435      item: 790        r_ui = 0.89   est = 0.92   {'was_impossible': False}
     ```
 
     Mari kita fokuskan perhatian kita kepada r_ui dan est. r_ui menunjukkan nilai rating yang sebenarnya dan est menunjukkan hasil prediksi rating pada suatu anime (item). Apabila kita lihat, jumlah kesalahan pada item dan . Nilai ini bisa terbilang sangat baik, karena nilai RMSE sudah mendekati 0.1. Maka dari itu, kita bisa menyimpulkan bahwa dengan menggunakan dataset pada rating, kita sudah bisa memprediksi anime yang akan direkomendasikan kepada user dengan sangat akurat.

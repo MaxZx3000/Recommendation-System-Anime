@@ -60,7 +60,7 @@ anime_id_field = "anime_id"
 rating_field = "rating"
 
 
-# Field-field pada rating
+# Field-field pada anime dataset
 name_field = "name"
 genre_field = "genre"
 type_field = "type"
@@ -92,7 +92,7 @@ def dynamically_increment_update(dictionary, key, increment_value):
   
    return dictionary
 
-"""### Exploratory Data Analysis Anime
+"""### Exploratory Data Analysis Anime.csv
 
 #### Variable Analysis
 
@@ -111,7 +111,7 @@ anime_df_analysis.info()
 
 anime_df_analysis.describe()
 
-"""#### Missing Value
+"""#### Data Preparation (Missing Value)
 
 Menghapus data yang null, karena kita masih punya 12017 data.
 """
@@ -121,7 +121,7 @@ anime_df_analysis.info()
 
 """Melihat jumlah episode yang "unknown""""
 
-anime_df_analysis[anime_df_analysis[episodes_field].str.contains("Unknown")].sum()
+anime_df_analysis[episodes_field].str.contains("Unknown").sum()
 
 """Hapus field-field episodes yang memiliki data "Unknown""""
 
@@ -199,7 +199,7 @@ Visualisasi Data Rating
 
 anime_df[rating_field].hist(bins=200)
 
-"""### Exploratory Data Analysis Rating
+"""### Exploratory Data Analysis Rating.csv
 
 #### Variable Analysis
 
@@ -213,16 +213,10 @@ anime_rating_analysis_df.info()
 
 anime_rating_analysis_df.describe()
 
-"""##### Eksplorasi Data Rating
+"""#### Data Preparation (Missing Values)
 
-Melihat persebaran data anime rating dengan menggunakan plot histogram.
-
-
+Menghapus rating yang memiliki rating -1. -1 artinya adalah user belum melakukan rating sama sekali.
 """
-
-anime_rating_analysis_df[rating_field].hist()
-
-"""Menghapus rating yang memiliki rating -1. -1 artinya adalah user belum melakukan rating sama sekali."""
 
 anomaly_ratings_df = anime_rating_analysis_df[anime_rating_analysis_df[rating_field] == -1]
 
@@ -233,6 +227,15 @@ anime_rating_analysis_df.drop(
     inplace=True)
 
 print(len(anime_rating_analysis_df))
+
+"""#### Eksplorasi Data Rating
+
+Melihat persebaran data anime rating dengan menggunakan plot histogram.
+
+
+"""
+
+anime_rating_analysis_df[rating_field].hist()
 
 """### Melihat jumlah user, place, dan rating yang tidak duplikat pada dataset rating"""
 
@@ -247,31 +250,35 @@ print(f"Total rating: {len(anime_rating_analysis_df[rating_field].unique())}")
 anime_rating_cbf_df = anime_rating_analysis_df
 anime_cbf_df = anime_df_analysis
 
-"""### Content based filtering Cosine Similarity dan TF IDF Vectorizer
+"""### Content based filtering Cosine Similarity dan Count Vectorizer
 
-* **TF IDF Vectorizer:**
+* **Count Vectorizer:**
 
-  TD-IDF (Term Frequency - Inverse Document Frequency) mengukur seberapa pentingnya suatu kata terhadap kata-kata lain dalam dokumen. Ia dibagi menjadi 2 komponen, yaitu TF dan IDF.
+  Count Vectorizer adalah salah satu teknik untuk melakukan konversi suatu string menjadi representasi frekuensi. Count Vectorizer ini sangat berguna untuk diimplementasikan apabila kita tidak ingin melihat hubungan makna yang terdapat pada kalimat tersebut. 
 
-  * TF mengukur seberapa sering kata muncul dalam teks tertentu. Teks yang berbeda dalam dokumen mungkin panjangnya berbeda, karena ada faktor dari panjang dokumen. Teks yang berbeda memiliki panjang yang berbeda. Maka dari itu, harus dinormalisasi dengan membagi jumlah kemunculan terhadap panjang dokumen.
+  Sebagai contoh, perhatikan kalimat berikut.
 
-  * IDF mengukur pentingnya suatu istilah di dalam korpus. Ia memastikan agar kepentingan suatu kata di dalam kalimat itu sama. Misalkan stop words seperti is, am, are, dsb sering muncul di suatu kalimat, namun mereka tidak penting kehadirannya. Maka dari itu, semua kata dinormalisasikan agar setiap kata bisa mendapatkan nilai kepentingan yang fair.
+  D1: Drama, Romance, School, Supernatural
 
-  Dari kesimpulan di atas, kita bisa mendapatkan rumus sebagai berikut.
+  D2: Drama, Comedy, School, Romance
 
-  ![Rumus TF-IDF](https://cdn-media-1.freecodecamp.org/images/1*nSqHXwOIJ2fa_EFLTh5KYw.png)
+  Maka dari itu, berikut adalah representasi dari count vectorizer.
 
-  Dalam fungsi ini, kita bisa menggunakan TfIdfVectorizer. TFIdfVectorizer adalah salah satu fungsi yang disediakan dari sklearn.
+
+  | Document | Drama | Romance | School | Supernatural | Comedy | 
+    | ------- | ------- | ------- | ------- | ------- | ------- | 
+    | D1 | 1 | 1 | 1 | 1 | 0 |        
+    | D2 | 1 | 1 | 1 | 0 | 1 |
 
 * **Cosine Similarity:**
 
   Cosine similarity adalah salah satu metrik untuk mengukur kesamaan. Cosine similarity mengukur kesamaan dua vektor dengan menentukan apakah kedua vektornya sudah mengarah kepada arah yang sama. Semakin kecil sudut cosinus, semakin besar nilai cosine similarity.
 
-  Metrik ini sering digunakan untuk analisis teks. Dalam hal ini, dari hasil TF IDF, kita akan mengukur kesamaan antar satu item dengan fitur yang ada pada item tersebut, sehingga kita bisa merekomendasikan anime yang cocok dengan genre yang diberikan.
+  Metrik ini sering digunakan untuk analisis teks. Dalam hal ini, dari hasil Count Vectorizer, kita akan mengukur kesamaan antar satu item dengan fitur yang ada pada item tersebut, sehingga kita bisa merekomendasikan anime yang cocok dengan genre yang diberikan.
 
   Rumusnya adalah sebagai berikut.
 
-    ![Rumus Cosine Similarity](https://neo4j.com/docs/graph-data-science/current/_images/cosine-similarity.png)
+    ![Rumus Cosine Similarity](https://www.researchgate.net/profile/Said-Salloum/publication/345471138/figure/fig2/AS:955431962808321@1604804139868/Cosine-similarity-formula.png)
 
 """
 
@@ -285,32 +292,32 @@ anime_genre_cbf_df[:5]
 Melakukan splitting value ketika ada tanda koma (,), agar kita bisa merekomendasikan anime yang memiliki genre tambahan selain genre yang ditentukan.
 """
 
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
 
 def split_token(value):
   return value.split(', ')
 
-tf_idf_vectorizer = TfidfVectorizer(tokenizer = split_token)
+count_vectorizer = CountVectorizer(tokenizer = split_token)
 
-tf_idf_vectorizer.fit(anime_genre_cbf_df)
+count_vectorizer.fit(anime_genre_cbf_df)
 
-tf_idf_vectorizer.get_feature_names()
+count_vectorizer.get_feature_names()
 
 """Mengecek ukuran bentuk matriks pada data anime_id dan genre."""
 
-tf_idf_matrix = tf_idf_vectorizer.fit_transform(anime_genre_cbf_df)
+count_vectorizer_matrix = count_vectorizer.fit_transform(anime_genre_cbf_df)
 
-tf_idf_matrix.shape
+count_vectorizer_matrix.shape
 
 """Melakukan testing dengan data pada indeks pertama"""
 
-tf_idf_matrix.todense()[0]
+count_vectorizer_matrix.todense()[0]
 
 """Mengukur kesamaan antar elemen yang satu dengan elemen yang lain, dengan menggunakan cosine similarity"""
 
 from sklearn.metrics.pairwise import cosine_similarity
 
-cosine_similarity_value = cosine_similarity(tf_idf_matrix)
+cosine_similarity_value = cosine_similarity(count_vectorizer_matrix)
 cosine_similarity_value
 
 cosine_similarity_df = pd.DataFrame(
@@ -330,8 +337,6 @@ def get_anime_recommendations(anime_name,
                               similarity_data = cosine_similarity_df,
                               items = anime_cbf_df[[name_field, genre_field]],
                               k = 4):
-  
-  print(range(-1, -k, -1))
 
   index = similarity_data.loc[:, anime_name].to_numpy().argpartition(
       range(-1, -k, -1)
@@ -350,9 +355,14 @@ anime_cbf_df[anime_cbf_df[genre_field].str.contains('Drama')]
 anime_recommendations = get_anime_recommendations('Kimi no Na wa.')
 anime_recommendations
 
-"""#### Melakukan evaluasi dengan metrik akurasi."""
+"""#### Melakukan evaluasi dengan metrik precision.
 
-def get_accuracy_content_based_filtering_metrics(df, 
+Dalam sistem rekomendasi, preision adalah jumlah item rekomendasi yang relevan. 
+
+Cara mendapatkan hasil ini adalah dengan menghitung jumlah rekomendasi yang relevan dengan jumlah item yang kita rekomendasikan.
+"""
+
+def get_precision_content_based_filtering_metrics(df, 
                                                  comparation_index, 
                                                  field_to_be_compared,
                                                  expected_name):
@@ -370,12 +380,12 @@ def get_accuracy_content_based_filtering_metrics(df,
 
   return total_accuracy_score
 
-genre_accuracy_score = get_accuracy_content_based_filtering_metrics(anime_recommendations,
-                                                                    -1,
-                                                                    genre_field,
-                                                                    "Drama")
+genre_precision_score = get_precision_content_based_filtering_metrics(anime_recommendations,
+                                                                      -1,
+                                                                      genre_field,
+                                                                      "Drama")
 
-print(f"Accuracy Score: {genre_accuracy_score}%")
+print(f"Precision Score: {genre_precision_score}%")
 
 """### Collaborative Filtering dengan SVD (Matrix Factorization)
 
@@ -411,16 +421,6 @@ from collections import defaultdict
 
 anime_rating_cbf_df
 
-"""**Standardisasi Nilai Rating**
-
-Melakukan standardisasi pada nilai rating, agar machine learning bisa lebih cepat mempelajari data (terutama jika berbicara mengenai jarak dan gradient descent), dengan skala antara 0 - 1.
-"""
-
-anime_rating_cbf_df[rating_field] = anime_rating_cbf_df[rating_field].apply(
-    lambda x: (x - 1) / (10 - 1)
-).values
-anime_rating_cbf_df.describe()
-
 """**Train Tets Split**
 
 Melakukan train test split, dengan proporsi sebagai berikut:
@@ -438,6 +438,21 @@ anime_rating_train_data, anime_rating_test_data = train_test_split(
     test_size = 0.2,
     random_state = 30
 )
+
+"""**Standardisasi Nilai Rating**
+
+Melakukan standardisasi pada nilai rating, agar machine learning bisa lebih cepat mempelajari data (terutama jika berbicara mengenai jarak dan gradient descent), dengan skala antara 0 - 1.
+"""
+
+anime_rating_train_data[rating_field] = anime_rating_train_data[rating_field].apply(
+    lambda x: (x - 1) / (10 - 1)
+)
+
+anime_rating_test_data[rating_field] =  anime_rating_test_data[rating_field].apply(
+    lambda x: (x - 1) / (10 - 1)
+)
+
+anime_rating_train_data
 
 """#### Training Model
 
