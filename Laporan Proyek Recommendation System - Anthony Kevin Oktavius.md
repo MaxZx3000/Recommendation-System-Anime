@@ -395,5 +395,5 @@ Langkah-langkah pemahaman data yang dilakukan adalah sebagai berikut.
         user: 23435      item: 790        r_ui = 0.89   est = 0.92   {'was_impossible': False}
     ```
 
-    Mari kita fokuskan perhatian kita kepada r_ui dan est. r_ui menunjukkan nilai rating yang sebenarnya dan est menunjukkan hasil prediksi rating pada suatu anime (item). Apabila kita lihat, jumlah kesalahan pada item dan . Nilai ini bisa terbilang sangat baik, karena nilai RMSE sudah mendekati 0.1. Maka dari itu, kita bisa menyimpulkan bahwa dengan menggunakan dataset pada rating, kita sudah bisa memprediksi anime yang akan direkomendasikan kepada user dengan sangat akurat.
+    Mari kita fokuskan perhatian kita kepada r_ui dan est. r_ui menunjukkan nilai rating yang sebenarnya dan est menunjukkan hasil prediksi rating pada suatu anime (item). Nilai ini bisa terbilang sangat baik, karena nilai RMSE sudah mendekati 0.1. Maka dari itu, kita bisa menyimpulkan bahwa dengan menggunakan dataset pada rating, kita sudah bisa memprediksi anime yang akan direkomendasikan kepada user dengan sangat akurat.
 
